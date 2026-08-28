@@ -1,0 +1,29 @@
+# ===========================================================================
+# scene_01 - <NAME THE NTU LOCATION HERE>
+#
+# Deep-merged on top of configs/default.yaml. Only override what differs.
+# Fill in description/capture_notes: they are copied into every results file
+# and become the "dataset description" section of your report.
+# ===========================================================================
+
+scene:
+  name: scene_01
+  source_type: images        # switch to `video` and set video_file for video capture
+  video_file: null           # e.g. videos/scene_01.mp4  (relative to data_root)
+  description: >
+    NTU campus scene 01. Replace with: exact location, structure photographed,
+    approximate dimensions, and the capture path walked around it.
+  capture_notes: >
+    Replace with: device and model, handheld vs tripod, weather and time of day,
+    approximate number of images, whether pedestrians/vehicles were moving in
+    frame, and any surfaces that are reflective, transparent or repetitive.
+
+# Stage 1 defaults to reporting only - nothing is discarded until the
+# image-quality experiment tells us discarding actually helps.
+quality:
+  mode: report_only
+
+# Uncomment once you know your capture resolution. Downscaling to ~3000 px on
+# the long side keeps matching fast without losing usable SIFT features.
+# processing:
+#   resize_max_dim: 3000

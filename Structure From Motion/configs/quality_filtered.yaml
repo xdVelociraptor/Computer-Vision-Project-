@@ -1,0 +1,28 @@
+# ===========================================================================
+# Quality-filtering profile - the treatment arm of the image-quality experiment
+# (project brief section 13).
+#
+# Usage:
+#   python scripts/run_preprocess.py --config configs/scene_01.yaml \
+#          --extra-config configs/quality_filtered.yaml --force
+#
+# Rejection is data-driven (bottom 15% of the sharpness distribution) rather
+# than a hard-coded Laplacian value, because absolute Laplacian-variance
+# thresholds do not transfer between scenes, cameras or lighting conditions.
+# ===========================================================================
+
+quality:
+  mode: filter
+  filters: [blur, brightness, contrast, resolution]
+  blur:
+    threshold_mode: percentile
+    percentile: 15.0
+  brightness:
+    min: 20.0
+    max: 240.0
+  contrast:
+    min: 12.0
+  resolution:
+    min_width: 640
+    min_height: 480
+    require_consistent: false

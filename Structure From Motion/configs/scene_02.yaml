@@ -1,0 +1,61 @@
+# ===========================================================================
+# scene_02 - NTU lecture theatre (indoor, hard case)
+#
+# This scene is included DELIBERATELY as the difficult counterpart to
+# scene_01. It exhibits, simultaneously, four of the classic causes of SfM
+# failure, which makes it the evidence base for the failure-analysis and
+# scene-generalisation sections of the report:
+#
+#   1. REPETITIVE STRUCTURE - hundreds of near-identical seats in regular rows.
+#      SIFT descriptors on one seat match many other seats almost equally well,
+#      so Lowe's ratio test discards most of them, and the ones that survive can
+#      be confidently wrong. This is the single most damaging property here.
+#   2. TEXTURELESS REGIONS - projection screens, painted walls, ceiling. No
+#      features are detectable at all in large parts of the frame.
+#   3. DYNAMIC OBJECTS - people move between shots, producing correspondences
+#      that are geometrically inconsistent with the static scene.
+#   4. SPECULAR / LOW LIGHT - glossy floor and screens reflect differently from
+#      each viewpoint, and indoor light forces high ISO (noise) or slow shutter
+#      (motion blur).
+#
+# Do NOT tune this scene's parameters until the baseline run has been recorded.
+# The honest result - including a failure - is worth more than a tuned one.
+# ===========================================================================
+
+scene:
+  name: scene_02
+  source_type: images
+  video_file: null
+  description: >
+    NTU lecture theatre, interior. Tiered seating (approximately N rows of blue
+    and grey fold-down seats), lecture podium, two retractable projection
+    screens, wood-panelled doors, suspended projector rigs and an exposed
+    ceiling service grid. REPLACE with: exact venue name/number, approximate
+    room dimensions, and the path walked during capture.
+  capture_notes: >
+    REPLACE with: device and model, handheld vs braced, time of day, whether
+    the room lights and projectors were on, approximate number of people
+    present and whether they moved, and whether exposure/focus were locked.
+    Note explicitly that repetitive seating and blank screens are present -
+    this is the point of the scene.
+
+# Repetitive structure is the dominant risk, so the analysis deliberately
+# probes it: a tighter ratio test suppresses ambiguous seat-to-seat matches,
+# and the wider strides show how fast overlap collapses across the room.
+feature_analysis:
+  detectors: [SIFT, ORB, AKAZE]
+  pairs:
+    mode: strided
+    strides: [1, 2, 5, 10, 20]
+    max_pairs: 60
+  matching:
+    # Stricter than the 0.75 default. On repetitive scenes a loose ratio lets
+    # through confident-but-wrong matches, which RANSAC then has to reject.
+    ratio: 0.70
+    mutual_check: true
+
+# Indoor capture is usually noisier and blurrier than outdoor. Keep the default
+# report_only policy so the baseline is untouched; the quality-filter
+# experiment decides later whether removing anything actually helps.
+quality:
+  mode: report_only

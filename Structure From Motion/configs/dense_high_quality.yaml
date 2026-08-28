@@ -1,0 +1,74 @@
+# ===========================================================================
+# High-quality dense MVS profile.
+#
+# Layer this ON TOP of a scene config:
+#   python scripts/run_reconstruction.py --config configs/scene_01.yaml \
+#       --config configs/dense_high_quality.yaml --dense --mesh --force
+#
+# Roughly 3-4x slower than the defaults. Every change below trades runtime or
+# point count for reliability, because the failure mode being addressed is a
+# noisy, speckled cloud rather than a sparse one.
+#
+# What this CANNOT fix: input resolution and compression. If the source images
+# were re-encoded by a messaging app, the fine texture MVS correlates on is
+# already gone, and no amount of filtering restores it.
+# ===========================================================================
+
+dense:
+  enabled: true
+
+  # Native resolution. The previous run used 1200 for speed, discarding 44% of
+  # the available pixels; MVS detail scales directly with this.
+  max_image_size: 1600
+
+  # Larger correlation window: markedly more robust on the low-texture concrete
+  # and painted surfaces that dominate this scene. Costs runtime and slightly
+  # softens fine detail.
+  window_radius: 7
+  window_step: 1
+
+  # More hypotheses and more propagation sweeps per pixel.
+  num_samples: 20
+  num_iterations: 7
+
+  geom_consistency: true
+  geom_consistency_regularizer: 0.3
+  geom_consistency_max_cost: 3.0
+  filter: true
+
+  # --- the filters that actually clean the cloud -------------------------
+  # Raised from 0.1. This is the primary speckle-noise control: depths whose
+  # patches correlate weakly are guesses, and guesses are what make a cloud
+  # look "bad".
+  filter_min_ncc: 0.15
+
+  # Raised from 3.0 deg. Removes the smeared sky/horizon points whose depth is
+  # numerically meaningless - the same points that inflated the bounding box
+  # from a robust 5.5 units to a raw 46.7.
+  filter_min_triangulation_angle: 5.0
+
+  # Require three views to agree instead of two. With 110 images there is
+  # plenty of redundancy to spend on this.
+  filter_min_num_consistent: 3
+  filter_geom_consistency_max_cost: 1.0
+
+  # More source views per reference image feeds the consistency check.
+  num_src_images: 30
+
+  cache_size_gb: 6.0
+
+  fusion:
+    # Require a slightly larger consistent support region per fused point.
+    min_num_pixels: 6
+    # Tightened from 2.0 px.
+    max_reproj_error: 1.5
+    max_depth_error: 0.008
+    max_normal_error: 10.0
+
+mesh:
+  enabled: true
+  method: poisson
+  # Deeper octree = finer mesh detail; trim removes low-density (unsupported)
+  # surface that Poisson otherwise hallucinates across gaps such as the sky.
+  poisson_depth: 13
+  poisson_trim: 9.0

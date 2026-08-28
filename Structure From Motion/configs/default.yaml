@@ -1,0 +1,267 @@
+# ===========================================================================
+# NTU SfM project - BASE configuration
+#
+# This file defines every tunable in the pipeline. Scene files in this folder
+# are deep-merged ON TOP of it, and `--set section.key=value` wins last.
+#
+# Any key not listed here is REJECTED with an error (typos must never be
+# silently ignored - that is how unreproducible experiments happen).
+# ===========================================================================
+
+project_name: ntu_sfm
+
+paths:
+  # Relative paths are resolved against the project root (the folder containing
+  # configs/). Dense MVS can produce several GB per scene - if you are short on
+  # space, or want to keep output out of OneDrive sync, point output_root at
+  # another drive, e.g.:  output_root: D:/sfm_outputs
+  data_root: data
+  output_root: outputs
+
+runtime:
+  log_level: INFO
+  workers: 8            # threads for image analysis
+  use_gpu: true         # unused by the from-scratch pipeline (CPU SIFT)
+  gpu_index: "0"        # unused by the from-scratch pipeline
+  num_threads: -1       # -1 = all logical cores
+  seed: 42
+
+scene:
+  name: scene_01
+  source_type: images   # images | video
+  video_file: null      # relative to data_root, or an absolute path
+  description: ""
+  capture_notes: ""
+
+# ---------------------------------------------------------------------------
+# Video -> frames
+# ---------------------------------------------------------------------------
+video:
+  mode: fps             # fps | every_n | max_frames
+  target_fps: 2.0       # used when mode=fps
+  every_n: 10           # used when mode=every_n
+  max_frames: 0         # used when mode=max_frames; 0 = unlimited
+  start_time_s: 0.0
+  end_time_s: 0.0       # 0 = until the end of the video
+  output_format: jpg
+  jpeg_quality: 95
+  min_blur_score: 0.0        # 0 disables blur rejection during extraction
+  min_hamming_distance: 0    # 0 disables consecutive-similarity rejection
+  resize_max_dim: 0          # 0 = keep native resolution
+
+# ---------------------------------------------------------------------------
+# Image quality diagnostics
+#
+# mode: report_only  -> compute every metric, accept every readable image
+# mode: filter       -> additionally apply the rules listed in `filters`
+#
+# report_only is the default ON PURPOSE. Whether discarding low-quality images
+# helps or hurts reconstruction is measured in the image-quality experiment,
+# not assumed here.
+# ---------------------------------------------------------------------------
+quality:
+  mode: report_only
+  blur_eval_long_side: 1024   # sharpness is measured at this scale for comparability
+  filters: []                 # [blur, brightness, contrast, resolution, duplicate, clipping]
+  blur:
+    threshold_mode: absolute  # absolute | percentile | mad
+    min_score: 60.0           # used when threshold_mode=absolute
+    percentile: 10.0          # used when threshold_mode=percentile
+    mad_k: 2.5                # used when threshold_mode=mad
+  brightness:
+    min: 25.0
+    max: 235.0
+  contrast:
+    min: 15.0
+  resolution:
+    min_width: 640
+    min_height: 480
+    require_consistent: false
+  duplicate:
+    hash_size: 8              # dHash side length -> 64-bit hash
+    max_hamming_distance: 3   # <=3/64 bits differing counts as a near-duplicate
+    keep: sharpest            # sharpest | first
+  clipping:
+    shadow_frac_max: 0.60
+    highlight_frac_max: 0.40
+
+# ---------------------------------------------------------------------------
+# How accepted images become processed_images/
+# ---------------------------------------------------------------------------
+processing:
+  resize_max_dim: 0           # 0 = keep native resolution
+  jpeg_quality: 95
+  apply_exif_transpose: true  # bake EXIF rotation into pixels
+  copy_mode: auto             # auto | copy | reencode
+  cache: true                 # cache per-image metrics between runs
+
+# ---------------------------------------------------------------------------
+# Camera model
+#
+# Read only for the focal prior (camera.default_focal_factor,
+# camera.use_exif_focal_prior). The from-scratch mapper solves one shared
+# focal per camera group and optional radial distortion itself.
+#
+# SIMPLE_RADIAL (f, cx, cy, k) is the recommended default for a single
+# smartphone camera: it adds one radial distortion coefficient, which is enough
+# for a modern phone lens, without the over-parameterisation of OPENCV (k1,k2,
+# p1,p2) that tends to be poorly constrained on small datasets.
+# ---------------------------------------------------------------------------
+camera:
+  model: SIMPLE_RADIAL
+  single_camera: true          # one shared intrinsic set for the whole scene
+  single_camera_per_folder: false
+  use_exif_focal_prior: true
+  default_focal_factor: 1.2    # f = 1.2 * max(w,h) when EXIF has no focal length
+
+# ---------------------------------------------------------------------------
+# Feature extraction
+#
+# NOTE: the from-scratch pipeline takes these from the CLI
+# (--feature-size, --max-features), not from this file.
+# ---------------------------------------------------------------------------
+features:
+  max_image_size: 3200
+  max_num_features: 8192
+  first_octave: -1
+  estimate_affine_shape: false   # more robust, much slower, CPU-only
+  domain_size_pooling: false
+  peak_threshold: 0.0066666666666666671
+  edge_threshold: 10.0
+
+# ---------------------------------------------------------------------------
+# STAGE 2 - independent OpenCV feature / two-view geometry analysis
+#
+# This is analysis alongside the reconstruction, not input to it. Its job is
+# to make a scene's
+# matching behaviour measurable and visible: how many raw matches survive the
+# Lowe ratio test, how many survive RANSAC geometric verification, and whether
+# the two-view geometry is degenerate (planar surface or pure rotation).
+# ---------------------------------------------------------------------------
+feature_analysis:
+  detectors: [SIFT, ORB, AKAZE]
+  max_image_size: 1600          # analysis-time downscale; 0 = native resolution
+  homography_dominance_threshold: 0.45   # above this, flag the pair as degenerate
+
+  sift:
+    n_features: 4000            # 0 = unlimited (brute-force matching gets slow)
+    n_octave_layers: 3
+    contrast_threshold: 0.04
+    edge_threshold: 10.0
+    sigma: 1.6
+  orb:
+    n_features: 5000
+    scale_factor: 1.2
+    n_levels: 8
+    fast_threshold: 20
+  akaze:
+    threshold: 0.001
+    n_octaves: 4
+    n_octave_layers: 4
+
+  matching:
+    method: bf                  # bf = exact + deterministic; flann = faster, approximate
+    ratio: 0.75                 # Lowe's ratio test
+    mutual_check: true          # require mutual nearest neighbours in both directions
+
+  ransac:
+    method: magsac              # ransac | lmeds | magsac | usac_default | usac_accurate
+    threshold_px: 1.5
+    confidence: 0.9999
+    max_iters: 10000
+
+  pairs:
+    mode: strided               # sequential | strided | explicit
+    strides: [1, 2, 5, 10]      # widening baselines - reveals overlap breakdown
+    max_pairs: 40
+    explicit: []                # ["IMG_001.jpg:IMG_014.jpg", ...] when mode=explicit
+
+  visualize:
+    max_figures: 6
+    max_drawn_matches: 120
+    num_epipolar_lines: 12
+
+# ---------------------------------------------------------------------------
+# Feature matching
+#
+# NOTE: the from-scratch pipeline takes the matcher from the CLI
+# (--sequential-window); this section is retained for stage-1 reporting only.
+# ---------------------------------------------------------------------------
+matching:
+  method: exhaustive             # exhaustive | sequential | vocab_tree | spatial
+  max_ratio: 0.8                 # Lowe ratio test
+  max_distance: 0.7
+  cross_check: true
+  max_num_matches: 32768
+  guided_matching: false
+  sequential:
+    overlap: 10
+    quadratic_overlap: true
+    loop_detection: false        # requires a vocabulary tree
+    loop_detection_period: 10
+    loop_detection_num_images: 50
+  vocab_tree_path: null
+
+# ---------------------------------------------------------------------------
+# Incremental mapper
+#
+# NOTE: the from-scratch mapper is configured by MapperConfig in
+# src/sfm_core/mapper.py, where every value carries the measurement that
+# justifies it. This section is not read by it.
+# ---------------------------------------------------------------------------
+mapper:
+  min_num_matches: 15
+  init_min_num_inliers: 100
+  abs_pose_min_num_inliers: 30
+  ba_refine_focal_length: true
+  ba_refine_principal_point: false
+  ba_refine_extra_params: true
+  ba_global_max_num_iterations: 50
+  multiple_models: true
+  max_num_models: 50
+  extract_colors: true
+
+# ---------------------------------------------------------------------------
+# Dense MVS
+#
+# The from-scratch plane-sweep MVS runs on the CPU and is configured from the
+# CLI (--dense-size, --depths, --min-ncc, --consistent-views).
+# ---------------------------------------------------------------------------
+dense:
+  enabled: false
+  max_image_size: 1600
+  window_radius: 5
+  window_step: 1
+  num_samples: 15
+  num_iterations: 5
+  geom_consistency: true
+  filter: true
+  cache_size_gb: 4.0
+  fusion:
+    min_num_pixels: 5
+    max_reproj_error: 2.0
+    max_depth_error: 0.01
+    max_normal_error: 10.0
+
+mesh:
+  enabled: false
+  method: poisson        # poisson | delaunay | open3d_poisson
+  poisson_depth: 11
+  poisson_trim: 7.0
+
+# ---------------------------------------------------------------------------
+# Controlled experiments
+# ---------------------------------------------------------------------------
+experiments:
+  subdir: experiments
+  image_counts: [25, 50, 75, 100, 125, 0]   # 0 = all available images
+  matchers: [exhaustive, sequential]
+  # Arms of the image-quality experiment. Derived from image_quality.csv, so no
+  # images are duplicated on disk:
+  #   all       - every image (the control)
+  #   blur_pNN  - discard the blurriest NN percent by Laplacian variance
+  #   sharpest_NN - keep only the sharpest NN percent
+  quality_arms: [all, blur_p15, blur_p30]
+  repeat: 1
+  skip_completed: true
+  run_dense: false

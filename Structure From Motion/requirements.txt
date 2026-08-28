@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# NTU Structure-from-Motion project - Python dependencies
+#
+# Target interpreter: CPython 3.12 (64-bit, Windows)
+#
+# WHY 3.12 AND NOT 3.13/3.14:
+#   Open3D 0.19.0 (latest release) only publishes wheels for cp38-cp312.
+#   Open3D is a hard requirement for dense point-cloud / mesh analysis, so the
+#   whole project is pinned to the highest interpreter it supports.
+#
+# Install with:
+#   py -3.12 -m venv .venv
+#   .\.venv\Scripts\Activate.ps1
+#   python -m pip install --upgrade pip
+#   pip install -r requirements.txt
+# ---------------------------------------------------------------------------
+
+# --- Scientific core -------------------------------------------------------
+numpy>=2.0,<3.0
+scipy>=1.13
+pandas>=2.2
+matplotlib>=3.8
+
+# --- Computer vision -------------------------------------------------------
+# Pinned to the 4.x line on purpose: OpenCV 5.x is a new major release with
+# API churn, and every SfM reference/tutorial targets the 4.x API.
+# 'contrib' build is used so SIFT/AKAZE/xfeatures are all guaranteed present.
+opencv-contrib-python==4.14.0.94
+
+# EXIF parsing, orientation handling, lossless-ish re-encoding
+Pillow>=10.3
+
+# --- 3D geometry / point clouds -------------------------------------------
+open3d==0.19.0
+
+# --- Utilities -------------------------------------------------------------
+PyYAML>=6.0
+tqdm>=4.66
+scikit-learn>=1.5
+scikit-image>=0.24
+psutil>=6.0
