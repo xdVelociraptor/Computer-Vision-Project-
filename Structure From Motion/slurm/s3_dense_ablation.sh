@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=64G
-#SBATCH --time=04:00:00
+#SBATCH --time=06:00:00
 #SBATCH --job-name=s3_dense_ablation
 #SBATCH --output=output_%x_%j.out
 #SBATCH --error=error_%x_%j.err

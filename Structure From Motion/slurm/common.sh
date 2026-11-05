@@ -3,7 +3,7 @@
 #   s1_light_robot          + lens_statue_tele
 #   s2_statue_ablations     + lens_building_ultrawide
 #   s3_dense_ablation       + lens_building_tele
-#   lens_ultrawide_true_focal
+#   lens_statue_ultrawide_true_focal + lens_building_ultrawide_true_focal
 # Statue wide/ultra-wide and building wide reuse the earlier fps3 runs
 # (scene_01_fps3, scene_03_fps3, scene_02_fps3), made with these same settings.
 
