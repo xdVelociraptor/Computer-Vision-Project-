@@ -47,22 +47,35 @@ def _quantize_normal(values: np.ndarray) -> np.ndarray:
     return np.clip(np.round(np.asarray(values, np.float64) * 127.0), -127, 127).astype(np.int8)
 
 
-def estimate_up_axis(camera_centers: np.ndarray, scene_points: np.ndarray) -> np.ndarray:
+def estimate_up_axis(camera_centers: np.ndarray, scene_points: np.ndarray,
+                     camera_rotations: Optional[np.ndarray] = None) -> np.ndarray:
     """Estimate world "up" from the camera path.
 
     SfM fixes the world frame arbitrarily - the first camera defines it - so a
     reconstruction has no notion of vertical and renders upside down as often
     as not. A handheld capture is carried at roughly constant height, so the
     camera centres are approximately coplanar and that plane is close to
-    horizontal; its normal is therefore a good estimate of up. The sign
-    ambiguity is resolved by requiring the cameras to sit *above* the scene.
+    horizontal; its normal gives the up *direction*.
+
+    The *sign* comes from how the camera was held. A phone is held roughly
+    upright, so each camera's image-up direction (camera -y, expressed in world
+    coordinates) points against gravity, and a majority vote over the capture
+    decides which side of the plane is up. The older rule - the cameras sit
+    *above* the scene - fails for ground-level captures of tall structures,
+    where the scene centroid lies above the camera path; on all four NTU scenes
+    it chose the wrong side. It remains only as a fallback when no rotations
+    are given.
     """
     centres = np.asarray(camera_centers, dtype=np.float64)
     if len(centres) < 3:
         return np.array([0.0, -1.0, 0.0])
     _, _, Vt = np.linalg.svd(centres - centres.mean(axis=0))
     up = Vt[-1]
-    if np.dot(centres.mean(axis=0) - np.asarray(scene_points).mean(axis=0), up) < 0:
+    if camera_rotations is not None and len(camera_rotations) == len(centres):
+        image_up = -np.asarray(camera_rotations, dtype=np.float64)[:, 1, :]
+        if np.mean(image_up @ up > 0) < 0.5:
+            up = -up
+    elif np.dot(centres.mean(axis=0) - np.asarray(scene_points).mean(axis=0), up) < 0:
         up = -up
     return up / max(np.linalg.norm(up), 1e-12)
 
@@ -140,7 +153,8 @@ def build_viewer(
     # gravity-aligned frame and the viewer's +Y really is up.
     R_up = np.eye(3)
     if align_up and camera_centers is not None and len(camera_centers) >= 3:
-        R_up = rotation_to_up(estimate_up_axis(np.asarray(camera_centers), stacked))
+        R_up = rotation_to_up(estimate_up_axis(np.asarray(camera_centers), stacked,
+                                               camera_rotations))
         LOGGER.info("Aligned reconstruction to gravity (rotated %.1f deg)",
                     np.degrees(np.arccos(np.clip((np.trace(R_up) - 1) / 2, -1, 1))))
 
