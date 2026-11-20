@@ -1,0 +1,60 @@
+{
+  "scene": "light_day",
+  "run_id": "20261106_075616",
+  "num_input_images": 68,
+  "sources": [
+    {
+      "kind": "video",
+      "origin": "CV/waterFountainAfternoon.mp4",
+      "group": 0,
+      "frames": 68,
+      "resolution": [
+        1080,
+        1920
+      ],
+      "notes": "68/101 sampled frames kept; 3 blurred, 30 near-duplicate"
+    }
+  ],
+  "implementation": "from scratch (no COLMAP / no SfM library)",
+  "models": {
+    "count": 1,
+    "sizes": [
+      68
+    ],
+    "merged": []
+  },
+  "sparse": {
+    "registered_images": 68,
+    "registration_rate": 100.0,
+    "num_points": 8447,
+    "mean_reprojection_error_px": 0.52864,
+    "median_reprojection_error_px": 0.38946,
+    "mean_track_length": 8.2226,
+    "refined_focal_px": 1648.0497,
+    "initial_focal_px": 2304.0,
+    "feature_time_s": 19.29,
+    "matching_time_s": 275.47,
+    "mapping_time_s": 1148.98,
+    "verified_pairs": 2278,
+    "num_tracks": 9784
+  },
+  "dense": {
+    "num_points": 14121604,
+    "views": 68,
+    "sweep_time": 839.5968,
+    "total_time": 885.0697,
+    "points": 14121604,
+    "mean_valid_fraction": 0.5769,
+    "image_size": 800,
+    "num_depths": 96
+  },
+  "surface": {
+    "vertices": 368112,
+    "faces": 681920,
+    "voxel_size": 0.02583,
+    "resolution": 256,
+    "observed_voxel_fraction": 0.86542,
+    "time": 41.43521
+  },
+  "total_time_s": 9920.15
+}

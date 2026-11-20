@@ -1,0 +1,60 @@
+{
+  "scene": "scene_01_fps3",
+  "run_id": "20260905_230740",
+  "num_input_images": 62,
+  "sources": [
+    {
+      "kind": "video",
+      "origin": "CV/IMG_0366.mov",
+      "group": 0,
+      "frames": 62,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "notes": "62/72 sampled frames kept; 2 blurred, 8 near-duplicate"
+    }
+  ],
+  "implementation": "from scratch (no COLMAP / no SfM library)",
+  "models": {
+    "count": 1,
+    "sizes": [
+      62
+    ],
+    "merged": []
+  },
+  "sparse": {
+    "registered_images": 62,
+    "registration_rate": 100.0,
+    "num_points": 24195,
+    "mean_reprojection_error_px": 0.80548,
+    "median_reprojection_error_px": 0.61088,
+    "mean_track_length": 3.9864,
+    "refined_focal_px": 1849.9689,
+    "initial_focal_px": 2880.0,
+    "feature_time_s": 21.06,
+    "matching_time_s": 1481.03,
+    "mapping_time_s": 1599.31,
+    "verified_pairs": 638,
+    "num_tracks": 44137
+  },
+  "dense": {
+    "num_points": 10365112,
+    "views": 62,
+    "sweep_time": 623.9738,
+    "total_time": 657.4449,
+    "points": 10365112,
+    "mean_valid_fraction": 0.4644,
+    "image_size": 800,
+    "num_depths": 96
+  },
+  "surface": {
+    "vertices": 125124,
+    "faces": 224406,
+    "voxel_size": 0.09651,
+    "resolution": 256,
+    "observed_voxel_fraction": 0.66996,
+    "time": 43.3666
+  },
+  "total_time_s": 11453.89
+}

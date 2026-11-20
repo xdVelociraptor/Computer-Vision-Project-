@@ -1,0 +1,60 @@
+{
+  "scene": "robot",
+  "run_id": "20261105_204716",
+  "num_input_images": 50,
+  "sources": [
+    {
+      "kind": "video",
+      "origin": "CV/SecurityRobotData.MOV",
+      "group": 0,
+      "frames": 50,
+      "resolution": [
+        1080,
+        1920
+      ],
+      "notes": "50/66 sampled frames kept; 7 blurred, 9 near-duplicate"
+    }
+  ],
+  "implementation": "from scratch (no COLMAP / no SfM library)",
+  "models": {
+    "count": 1,
+    "sizes": [
+      48
+    ],
+    "merged": []
+  },
+  "sparse": {
+    "registered_images": 48,
+    "registration_rate": 96.0,
+    "num_points": 20801,
+    "mean_reprojection_error_px": 0.67343,
+    "median_reprojection_error_px": 0.47467,
+    "mean_track_length": 4.2285,
+    "refined_focal_px": 1784.0248,
+    "initial_focal_px": 2304.0,
+    "feature_time_s": 12.6,
+    "matching_time_s": 653.35,
+    "mapping_time_s": 802.37,
+    "verified_pairs": 646,
+    "num_tracks": 29849
+  },
+  "dense": {
+    "num_points": 6815899,
+    "views": 48,
+    "sweep_time": 530.7228,
+    "total_time": 548.0081,
+    "points": 6815899,
+    "mean_valid_fraction": 0.3944,
+    "image_size": 800,
+    "num_depths": 96
+  },
+  "surface": {
+    "vertices": 386558,
+    "faces": 712064,
+    "voxel_size": 0.02089,
+    "resolution": 256,
+    "observed_voxel_fraction": 0.75903,
+    "time": 75.24241
+  },
+  "total_time_s": 8626.43
+}

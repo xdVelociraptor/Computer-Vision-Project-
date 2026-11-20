@@ -120,6 +120,26 @@ of which estimate geometry: none
 
 ---
 
+## Report results: interactive reconstructions
+
+The five main reconstructions in the report are in [`results/`](results/), each
+as a self-contained 3D viewer plus the run's `summary.json` (all metrics).
+Download an `.html` file and open it in a browser. Toggle sparse points, dense points, the mesh and camera poses, or switch between the Home, Top, Front and Side views.
+
+| Scene | Capture | Viewer | Metrics |
+|---|---|---|---|
+| Textured statue | 29 photos, iPhone 17 | [textured_statue.html](results/textured_statue.html) | [summary](results/textured_statue_summary.json) |
+| Tall statue | 4K video, 27 mm, iPhone 12 Pro Max | [tall_statue.html](results/tall_statue.html) | [summary](results/tall_statue_summary.json) |
+| Big building | 4K video, 27 mm, iPhone 12 Pro Max | [big_building.html](results/big_building.html) | [summary](results/big_building_summary.json) |
+| Water dispenser | 1080p video, afternoon, Galaxy S23 FE | [water_dispenser.html](results/water_dispenser.html) | [summary](results/water_dispenser_summary.json) |
+| Security robot | 1080p video, iPhone 17 | [security_robot.html](results/security_robot.html) | [summary](results/security_robot_summary.json) |
+
+All five use the same frozen settings:
+`--feature-size 2400 --min-ncc 0.35 --consistent-views 2 --multi-model`.
+The ablation, lens and lighting runs are kept outside the repository.
+
+---
+
 ## 2. Results
 
 Measured 2026-08-22. Both scenes are 1.9 MP WhatsApp-compressed JPEGs with EXIF

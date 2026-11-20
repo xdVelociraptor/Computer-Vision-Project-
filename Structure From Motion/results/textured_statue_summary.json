@@ -1,0 +1,61 @@
+{
+  "scene": "abl_full",
+  "run_id": "20261106_075756",
+  "num_input_images": 29,
+  "sources": [
+    {
+      "kind": "images",
+      "origin": "CV/raw_images",
+      "group": 0,
+      "frames": 29,
+      "resolution": [
+        4284,
+        5712
+      ],
+      "notes": ""
+    }
+  ],
+  "implementation": "from scratch (no COLMAP / no SfM library)",
+  "models": {
+    "count": 2,
+    "sizes": [
+      18,
+      9
+    ],
+    "merged": []
+  },
+  "sparse": {
+    "registered_images": 18,
+    "registration_rate": 62.07,
+    "num_points": 6370,
+    "mean_reprojection_error_px": 0.40201,
+    "median_reprojection_error_px": 0.31894,
+    "mean_track_length": 2.3253,
+    "refined_focal_px": 1805.1087,
+    "initial_focal_px": 1733.3333,
+    "feature_time_s": 35.12,
+    "matching_time_s": 184.11,
+    "mapping_time_s": 231.67,
+    "verified_pairs": 60,
+    "num_tracks": 9489
+  },
+  "dense": {
+    "num_points": 2804799,
+    "views": 16,
+    "sweep_time": 222.9355,
+    "total_time": 232.0042,
+    "points": 2804799,
+    "mean_valid_fraction": 0.3652,
+    "image_size": 800,
+    "num_depths": 96
+  },
+  "surface": {
+    "vertices": 373870,
+    "faces": 711388,
+    "voxel_size": 0.03358,
+    "resolution": 256,
+    "observed_voxel_fraction": 0.58881,
+    "time": 37.69852
+  },
+  "total_time_s": 3092.46
+}
